@@ -4,6 +4,12 @@ Mumbai street-condition survey dashboard (Vite + React 18 + React Router), extra
 from the [CityLens](https://github.com/parakram10/CityLens) monorepo as a standalone
 frontend.
 
+## Demo
+
+Watch CityLens in action detecting potholes and garbage from dashcam footage:
+
+[![CityLens Demo](https://img.youtube.com/vi/VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=VIDEO_ID)
+
 ## Run
 
 ```bash
