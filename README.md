@@ -8,7 +8,7 @@ frontend.
 
 Watch CityLens in action detecting potholes and garbage from dashcam footage:
 
-[![CityLens Demo](https://img.youtube.com/vi/VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=VIDEO_ID)
+[![CityLens Demo](https://img.youtube.com/vi/LCvah2cFoSE/0.jpg)](https://www.youtube.com/watch?v=LCvah2cFoSE)
 
 ## Run
 
