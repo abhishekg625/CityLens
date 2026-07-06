@@ -8,6 +8,7 @@ const UIContext = createContext(null);
 export function UIProvider({ children }) {
   const [drawer, setDrawer] = useState(null); // { issueId, opts }
   const [modal, setModal] = useState(null); // { type, payload }
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const openIssue = useCallback((issueId, opts = {}) => {
     setModal(null);
@@ -16,10 +17,15 @@ export function UIProvider({ children }) {
   const closeDrawer = useCallback(() => setDrawer(null), []);
   const openModal = useCallback((type, payload) => setModal({ type, payload }), []);
   const closeModal = useCallback(() => setModal(null), []);
-  const closeAll = useCallback(() => { setDrawer(null); setModal(null); }, []);
+  const openSettings = useCallback(() => setSettingsOpen(true), []);
+  const closeSettings = useCallback(() => setSettingsOpen(false), []);
+  const closeAll = useCallback(() => { setDrawer(null); setModal(null); setSettingsOpen(false); }, []);
 
   return (
-    <UIContext.Provider value={{ drawer, modal, openIssue, closeDrawer, openModal, closeModal, closeAll }}>
+    <UIContext.Provider value={{
+      drawer, modal, settingsOpen, openIssue, closeDrawer, openModal, closeModal,
+      openSettings, closeSettings, closeAll,
+    }}>
       {children}
     </UIContext.Provider>
   );

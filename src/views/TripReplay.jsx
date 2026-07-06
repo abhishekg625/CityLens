@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import L from 'leaflet';
 import Header from '../components/Header.jsx';
 import { DATA } from '../lib/data.js';
@@ -15,6 +16,7 @@ import { useStore } from '../lib/useStore.js';
 // video/map/feed are tightly time-synced, exactly like the original.
 export default function TripReplay() {
   useStore();
+  const { t } = useTranslation();
   const { bus, trip: tripId } = useParams();
   const navigate = useNavigate();
   const { openIssue } = useUI();
@@ -71,17 +73,18 @@ export default function TripReplay() {
     function markerForLive(i) {
       const km = (replay.df * totalKm).toFixed(1);
       return L.circleMarker(posAt(replay.df), { radius: 3 + i.severity * 1.4, fillColor: TYPE[i.type].c, color: '#fff', weight: 1.4, fillOpacity: .9 })
-        .bindPopup(`<b>${TYPE[i.type].label}</b> · ${Math.round(i.confidence * 100)}% confidence<br>${fmtClock(i.t)} into clip · ${km} km along route`);
+        .bindPopup(`<b>${t(`issueTypes.${i.type}`)}</b> · ${Math.round(i.confidence * 100)}% confidence<br>${t('tripReplay.intoClip', { time: fmtClock(i.t), km })}`);
     }
     function addFeedLive(i) {
       const feed = feedRef.current; if (!feed) return;
       if (replay.seen.size === 1) feed.innerHTML = '';
       const km = (replay.df * totalKm).toFixed(1);
       const el = document.createElement('div'); el.className = 'feeditem';
+      const pct = Math.round(i.confidence * 100);
       el.innerHTML = `<span class="tdot" style="background:${TYPE[i.type].c}"></span>
         ${i.crop ? `<img src="/${i.crop}" style="width:36px;height:36px;object-fit:cover;border-radius:4px;flex:0 0 36px" onerror="this.remove()">` : ''}
-        <div class="meta"><div class="t1">${TYPE[i.type].label} <span class="sev" style="background:${SEVC[i.severity]}">SEV ${i.severity}</span></div>
-        <div class="t2">${fmtClock(i.t)} into clip · ${km} km · ${Math.round(i.confidence * 100)}% · ${i.id}</div></div>`;
+        <div class="meta"><div class="t1">${t(`issueTypes.${i.type}`)} <span class="sev" style="background:${SEVC[i.severity]}">SEV ${i.severity}</span></div>
+        <div class="t2">${t('tripReplay.intoClipShort', { time: fmtClock(i.t), km, pct, id: i.id })}</div></div>`;
       feed.prepend(el);
       if (feednRef.current) feednRef.current.textContent = String(replay.seen.size);
     }
@@ -93,9 +96,11 @@ export default function TripReplay() {
       const feed = feedRef.current; if (!feed) return;
       if (replay.seen.size === 1) feed.innerHTML = '';
       const el = document.createElement('div'); el.className = 'feeditem';
+      const km = (replay.t * totalKm).toFixed(1);
+      const pct = Math.round(i.confidence * 100);
       el.innerHTML = `<span class="tdot" style="background:${TYPE[i.type].c}"></span>
-        <div class="meta"><div class="t1">${TYPE[i.type].label} <span class="sev" style="background:${SEVC[i.severity]}">SEV ${i.severity}</span></div>
-        <div class="t2">${(replay.t * totalKm).toFixed(1)} km · ${Math.round(i.confidence * 100)}% · ${i.id}</div></div>`;
+        <div class="meta"><div class="t1">${t(`issueTypes.${i.type}`)} <span class="sev" style="background:${SEVC[i.severity]}">SEV ${i.severity}</span></div>
+        <div class="t2">${t('tripReplay.kmShort', { km, pct, id: i.id })}</div></div>`;
       el.onclick = () => openIssue(i.id);
       feed.prepend(el);
       if (feednRef.current) feednRef.current.textContent = String(replay.seen.size);
@@ -104,7 +109,7 @@ export default function TripReplay() {
     function stopReplay() {
       if (replay.timer) { clearInterval(replay.timer); replay.timer = null; }
       const v = videoRef.current; if (v && !v.paused) v.pause();
-      if (playBtnRef.current) playBtnRef.current.textContent = replay.t >= 1 ? '▶ Replay' : '▶ Play';
+      if (playBtnRef.current) playBtnRef.current.textContent = replay.t >= 1 ? t('tripReplay.replay') : t('tripReplay.play');
     }
     resetHandlerRef.current = () => { stopReplay(); setResetTick(k => k + 1); };
 
@@ -139,8 +144,8 @@ export default function TripReplay() {
         video.currentTime = ((e.clientX - r.left) / r.width) * (video.duration || 0);
       };
       playHandlerRef.current = () => {
-        if (video.paused) { video.play(); if (playBtnRef.current) playBtnRef.current.textContent = '❚❚ Pause'; }
-        else { video.pause(); if (playBtnRef.current) playBtnRef.current.textContent = '▶ Play'; }
+        if (video.paused) { video.play(); if (playBtnRef.current) playBtnRef.current.textContent = t('tripReplay.pause'); }
+        else { video.pause(); if (playBtnRef.current) playBtnRef.current.textContent = t('tripReplay.play'); }
       };
     }
     function wireSimulated() {
@@ -159,7 +164,7 @@ export default function TripReplay() {
       }
       playHandlerRef.current = () => {
         if (replay.timer) { stopReplay(); }
-        else { if (playBtnRef.current) playBtnRef.current.textContent = '❚❚ Pause'; replay.timer = setInterval(step, 90); }
+        else { if (playBtnRef.current) playBtnRef.current.textContent = t('tripReplay.pause'); replay.timer = setInterval(step, 90); }
       };
       trackClickRef.current = null;
     }
@@ -187,27 +192,27 @@ export default function TripReplay() {
       <Header
         crumb={[
           { t: 'Mumbai', to: '/' },
-          { t: 'Fleet', to: '/fleet' },
+          { t: t('tripReplay.fleet'), to: '/fleet' },
           { t: bus, to: '/fleet' },
           { t: fmtDate(trip.date) },
         ]}
         title={bus}
-        sub={`Trip on ${fmtDate(trip.date)} — dashcam replay with detections dropping in sync.`}
+        sub={t('tripReplay.sub', { date: fmtDate(trip.date) })}
       />
       <div className="content">
         <div className="row map-side">
           <div className="card">
-            <div className="ch"><h3>Trip replay — {fmtDate(trip.date)}</h3><span className="r">bus {bus}</span></div>
+            <div className="ch"><h3>{t('tripReplay.tripReplay', { date: fmtDate(trip.date) })}</h3><span className="r">{t('tripReplay.bus', { bus })}</span></div>
             <div className="videoslot" key={trip.id + ':' + resetTick}>
               {run && run.video && (
                 <video ref={videoRef} src={`/${run.video}`} muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
               )}
-              <div className="rd"><span className="d" />DASHCAM</div>
-              <div ref={fallbackRef} style={{ display: (run && run.video) ? 'none' : '' }}>No clip bundled for this trip — map pins still sync to the route timeline below.</div>
+              <div className="rd"><span className="d" />{t('tripReplay.dashcam')}</div>
+              <div ref={fallbackRef} style={{ display: (run && run.video) ? 'none' : '' }}>{t('tripReplay.noClip')}</div>
             </div>
             <div ref={mapDivRef} id="fleetmap" style={{ width: '100%', height: 220 }} />
             <div className="controls">
-              <button className="btn primary sm" ref={playBtnRef} onClick={() => playHandlerRef.current && playHandlerRef.current()}>▶ Play</button>
+              <button className="btn primary sm" ref={playBtnRef} onClick={() => playHandlerRef.current && playHandlerRef.current()}>{t('tripReplay.play')}</button>
               <button className="btn sm" onClick={() => resetHandlerRef.current && resetHandlerRef.current()}>↺</button>
               <div className="track" ref={trackRef} onClick={e => trackClickRef.current && trackClickRef.current(e)}>
                 <div className="fill" ref={fillRef} />
@@ -216,13 +221,13 @@ export default function TripReplay() {
             </div>
           </div>
           <div className="card">
-            <div className="ch"><h3>Detections this run</h3><span className="r" ref={feednRef}>0</span></div>
-            <div className="feed" ref={feedRef}><div className="hint">Press play — confirmed detections along the route appear here as the bus passes them.</div></div>
-            <div className="ch" style={{ borderTop: '1px solid var(--line)' }}><h3>Trip stops</h3></div>
+            <div className="ch"><h3>{t('tripReplay.detectionsThisRun')}</h3><span className="r" ref={feednRef}>0</span></div>
+            <div className="feed" ref={feedRef}><div className="hint">{t('tripReplay.pressPlay')}</div></div>
+            <div className="ch" style={{ borderTop: '1px solid var(--line)' }}><h3>{t('tripReplay.tripStops')}</h3></div>
             <div style={{ maxHeight: 220, overflowY: 'auto' }}>
               <div className="tablewrap">
                 <table>
-                  <thead><tr><th>Issue</th><th>Street</th><th>Sev</th></tr></thead>
+                  <thead><tr><th>{t('tripReplay.issue')}</th><th>{t('tripReplay.street')}</th><th>{t('tripReplay.sev')}</th></tr></thead>
                   <tbody>
                     {trip.stops.map(i => (
                       <tr className="clk" key={i.id} onClick={() => openIssue(i.id)}>

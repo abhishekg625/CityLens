@@ -5,6 +5,7 @@ import { DATA } from './data.js';
 import { issues, wardScores, SCORES } from './model.js';
 import { notify } from './store.js';
 import { showToast } from './liveToast.js';
+import i18next from '../i18n/index.js';
 
 let liveRev = null;
 
@@ -23,9 +24,10 @@ export async function pollLive() {
     Object.assign(SCORES, wardScores());
     if (first) { notify(); return; } // silent sync at startup
     const added = p.issues.length - prevLive;
+    const statusLabel = i18next.t(p.partial ? 'liveToast.processingVideo' : 'liveToast.processingComplete');
     showToast(
-      `<span class="dot"></span> ${p.partial ? 'Processing video' : 'Processing complete'} · <b>${p.issues.length}</b> detections`
-      + (added > 0 ? ` · <span style="color:#8fd39a">+${added} new</span>` : '')
+      `<span class="dot"></span> ${statusLabel} · <b>${p.issues.length}</b> detections`
+      + (added > 0 ? ` · <span style="color:#8fd39a">${i18next.t('liveToast.newDetections', { count: added })}</span>` : '')
     );
     notify();
   } catch (e) { /* live.json not served — ignore */ }

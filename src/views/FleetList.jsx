@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Header from '../components/Header.jsx';
 import { DATA } from '../lib/data.js';
 import { OPEN, issues, fmtDate } from '../lib/model.js';
@@ -8,6 +9,7 @@ import { useStore } from '../lib/useStore.js';
 
 export default function FleetList() {
   useStore();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [expanded, setExpanded] = useState(null);
   const perBus = DATA.buses.map(b => {
@@ -17,16 +19,16 @@ export default function FleetList() {
 
   return (
     <>
-      <Header crumb={[{ t: 'Mumbai', to: '/' }, { t: 'Fleet' }]} title="Fleet & route replay"
+      <Header crumb={[{ t: 'Mumbai', to: '/' }, { t: t('fleetList.fleet') }]} title={t('fleetList.title')}
         sub={liveRuns().length
-          ? 'Live detections from the on-bus model — open a trip below to watch the synced replay.'
-          : 'Per-bus contribution — expand a bus to see its logged trips.'} />
+          ? t('fleetList.subLive')
+          : t('fleetList.subLogged')} />
       <div className="content">
         <div className="card">
-          <div className="ch"><h3>Fleet contribution</h3><span className="r">{DATA.buses.length} buses · click a bus to expand its trip log</span></div>
+          <div className="ch"><h3>{t('fleetList.fleetContribution')}</h3><span className="r">{t('fleetList.contributionHint', { count: DATA.buses.length })}</span></div>
           <div className="tablewrap">
             <table>
-              <thead><tr><th></th><th>Bus</th><th>Detections</th><th>Open</th><th>Trips</th></tr></thead>
+              <thead><tr><th></th><th>{t('fleetList.bus')}</th><th>{t('fleetList.detections')}</th><th>{t('fleetList.open')}</th><th>{t('fleetList.trips')}</th></tr></thead>
               {perBus.map(x => (
                 <tbody key={x.b}>
                   <tr className="clk" onClick={() => setExpanded(e => e === x.b ? null : x.b)}>
@@ -38,7 +40,7 @@ export default function FleetList() {
                         {x.trips.length ? (
                           <div className="tablewrap">
                             <table>
-                              <thead><tr><th>Date</th><th>Ward</th><th>Detections</th><th>Stops</th></tr></thead>
+                              <thead><tr><th>{t('fleetList.date')}</th><th>{t('fleetList.ward')}</th><th>{t('fleetList.detections')}</th><th>{t('fleetList.stops')}</th></tr></thead>
                               <tbody>
                                 {x.trips.map(t => (
                                   <tr className="clk" key={t.id} onClick={e => { e.stopPropagation(); navigate(`/fleet/${x.b}/${t.id}`); }}>
@@ -48,7 +50,7 @@ export default function FleetList() {
                               </tbody>
                             </table>
                           </div>
-                        ) : <div className="hint" style={{ padding: '12px 16px' }}>No logged trips for this bus.</div>}
+                        ) : <div className="hint" style={{ padding: '12px 16px' }}>{t('fleetList.noLoggedTrips')}</div>}
                       </td>
                     </tr>
                   )}

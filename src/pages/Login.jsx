@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { login, signUp, requestReset, resetPassword, WARD_CODES } from '../lib/auth.js';
 import { useSession } from '../context/SessionContext.jsx';
 
 export default function Login() {
+  const { t } = useTranslation();
   const [tab, setTab] = useState('login'); // 'login' | 'signup' | 'forgot'
   const navigate = useNavigate();
   const { refresh } = useSession();
@@ -15,11 +17,11 @@ export default function Login() {
       <div className="authcard">
         <div className="brand" style={{ borderBottom: 'none', padding: '0 0 18px' }}>
           <div className="mark" />
-          <div><b>CityLens</b><span>Mumbai · BMC</span></div>
+          <div><b>CityLens</b><span>{t('login.tagline')}</span></div>
         </div>
         <div className="tabs">
-          <button type="button" className={`tab ${tab === 'login' ? 'active' : ''}`} onClick={() => setTab('login')}>Log in</button>
-          <button type="button" className={`tab ${tab === 'signup' ? 'active' : ''}`} onClick={() => setTab('signup')}>Create account</button>
+          <button type="button" className={`tab ${tab === 'login' ? 'active' : ''}`} onClick={() => setTab('login')}>{t('login.logIn')}</button>
+          <button type="button" className={`tab ${tab === 'signup' ? 'active' : ''}`} onClick={() => setTab('signup')}>{t('login.createAccount')}</button>
         </div>
         {tab === 'login' && <LoginForm onSuccess={goToDashboard} onForgot={() => setTab('forgot')} />}
         {tab === 'signup' && <SignupForm onSuccess={goToDashboard} />}
@@ -30,6 +32,7 @@ export default function Login() {
 }
 
 function LoginForm({ onSuccess, onForgot }) {
+  const { t } = useTranslation();
   const [user, setUser] = useState('');
   const [pass, setPass] = useState('');
   const [err, setErr] = useState('');
@@ -39,16 +42,17 @@ function LoginForm({ onSuccess, onForgot }) {
   };
   return (
     <form className="authform" onSubmit={submit}>
-      <div className="field"><label>Username or mobile</label><input type="text" autoComplete="username" required value={user} onChange={e => setUser(e.target.value)} /></div>
-      <div className="field"><label>Password</label><input type="password" autoComplete="current-password" required value={pass} onChange={e => setPass(e.target.value)} /></div>
+      <div className="field"><label>{t('login.usernameOrMobile')}</label><input type="text" autoComplete="username" required value={user} onChange={e => setUser(e.target.value)} /></div>
+      <div className="field"><label>{t('login.password')}</label><input type="password" autoComplete="current-password" required value={pass} onChange={e => setPass(e.target.value)} /></div>
       <div className="autherr">{err}</div>
-      <button className="btn primary" type="submit" style={{ width: '100%' }}>Log in</button>
-      <a className="authlink" onClick={onForgot}>Forgot password?</a>
+      <button className="btn primary" type="submit" style={{ width: '100%' }}>{t('login.logIn')}</button>
+      <a className="authlink" onClick={onForgot}>{t('login.forgotPassword')}</a>
     </form>
   );
 }
 
 function SignupForm({ onSuccess }) {
+  const { t } = useTranslation();
   const [username, setUsername] = useState('');
   const [mobile, setMobile] = useState('');
   const [pass, setPass] = useState('');
@@ -59,7 +63,7 @@ function SignupForm({ onSuccess }) {
   const [err, setErr] = useState('');
   const submit = async e => {
     e.preventDefault(); setErr('');
-    if (pass !== pass2) { setErr('Passwords do not match.'); return; }
+    if (pass !== pass2) { setErr(t('login.passwordsDontMatch')); return; }
     try {
       await signUp({ username, mobile, password: pass, role, ward, specialism });
       await login(username, pass);
@@ -68,44 +72,45 @@ function SignupForm({ onSuccess }) {
   };
   return (
     <form className="authform" onSubmit={submit}>
-      <div className="field"><label>Username</label><input type="text" autoComplete="username" required minLength={3} maxLength={24} value={username} onChange={e => setUsername(e.target.value)} /></div>
-      <div className="field"><label>Mobile number</label><input type="tel" autoComplete="tel" inputMode="numeric" pattern="[0-9]{10}" required placeholder="10-digit mobile" value={mobile} onChange={e => setMobile(e.target.value)} /></div>
-      <div className="field"><label>Password</label><input type="password" autoComplete="new-password" required minLength={6} value={pass} onChange={e => setPass(e.target.value)} /></div>
-      <div className="field"><label>Confirm password</label><input type="password" autoComplete="new-password" required minLength={6} value={pass2} onChange={e => setPass2(e.target.value)} /></div>
+      <div className="field"><label>{t('login.username')}</label><input type="text" autoComplete="username" required minLength={3} maxLength={24} value={username} onChange={e => setUsername(e.target.value)} /></div>
+      <div className="field"><label>{t('login.mobileNumber')}</label><input type="tel" autoComplete="tel" inputMode="numeric" pattern="[0-9]{10}" required placeholder={t('login.mobilePlaceholder')} value={mobile} onChange={e => setMobile(e.target.value)} /></div>
+      <div className="field"><label>{t('login.password')}</label><input type="password" autoComplete="new-password" required minLength={6} value={pass} onChange={e => setPass(e.target.value)} /></div>
+      <div className="field"><label>{t('login.confirmPassword')}</label><input type="password" autoComplete="new-password" required minLength={6} value={pass2} onChange={e => setPass2(e.target.value)} /></div>
       <div className="field">
-        <label>Log in as</label>
+        <label>{t('login.logInAs')}</label>
         <select value={role} onChange={e => setRole(e.target.value)}>
-          <option value="admin">Admin</option>
-          <option value="ward_officer">Ward Officer</option>
-          <option value="user">User</option>
-          <option value="crew">Crew member</option>
+          <option value="admin">{t('login.roleAdmin')}</option>
+          <option value="ward_officer">{t('login.roleWardOfficer')}</option>
+          <option value="user">{t('login.roleUser')}</option>
+          <option value="crew">{t('login.roleCrew')}</option>
         </select>
       </div>
       {(role === 'ward_officer' || role === 'crew') && (
         <div className="field">
-          <label>Ward</label>
+          <label>{t('login.ward')}</label>
           <select value={ward} onChange={e => setWard(e.target.value)}>
-            {WARD_CODES.map(w => <option key={w} value={w}>Ward {w}</option>)}
+            {WARD_CODES.map(w => <option key={w} value={w}>{t('login.wardOption', { code: w })}</option>)}
           </select>
         </div>
       )}
       {role === 'crew' && (
         <div className="field">
-          <label>Specialism</label>
+          <label>{t('login.specialism')}</label>
           <select value={specialism} onChange={e => setSpecialism(e.target.value)}>
-            <option value="pothole">Pothole</option>
-            <option value="garbage_pile">Garbage / Sanitation</option>
-            <option value="street_obstruction">Street obstruction</option>
+            <option value="pothole">{t('login.specialismPothole')}</option>
+            <option value="garbage_pile">{t('login.specialismGarbage')}</option>
+            <option value="street_obstruction">{t('login.specialismObstruction')}</option>
           </select>
         </div>
       )}
       <div className="autherr">{err}</div>
-      <button className="btn primary" type="submit" style={{ width: '100%' }}>Create account</button>
+      <button className="btn primary" type="submit" style={{ width: '100%' }}>{t('login.createAccount')}</button>
     </form>
   );
 }
 
 function ForgotForm({ onBack }) {
+  const { t } = useTranslation();
   const [user, setUser] = useState('');
   const [sent, setSent] = useState(false);
   const [code, setCode] = useState('');
@@ -120,32 +125,32 @@ function ForgotForm({ onBack }) {
       const generated = requestReset(user);
       setSent(true);
       setErrColor('var(--good)');
-      setErr('Demo reset code: ' + generated + ' (shown here since no SMS/email is wired up)');
+      setErr(t('login.demoResetCode', { code: generated }));
     } catch (ex) { setErrColor(''); setErr(ex.message); }
   };
   const submit = async e => {
     e.preventDefault();
     try {
       await resetPassword(code, newPass);
-      setErrColor('var(--good)'); setErr('Password reset. You can log in now.');
+      setErrColor('var(--good)'); setErr(t('login.passwordResetDone'));
       setDone(true);
       setTimeout(onBack, 1200);
     } catch (ex) { setErrColor(''); setErr(ex.message); }
   };
   return (
     <form className="authform" onSubmit={submit}>
-      <div className="authhint">This is a static prototype with no SMS/email backend, so the reset code is shown on screen instead of being sent to your phone.</div>
-      <div className="field"><label>Username or mobile</label><input type="text" required value={user} onChange={e => setUser(e.target.value)} disabled={done} /></div>
-      {!sent && <button className="btn" type="button" style={{ width: '100%' }} onClick={send}>Send reset code</button>}
+      <div className="authhint">{t('login.resetHint')}</div>
+      <div className="field"><label>{t('login.usernameOrMobile')}</label><input type="text" required value={user} onChange={e => setUser(e.target.value)} disabled={done} /></div>
+      {!sent && <button className="btn" type="button" style={{ width: '100%' }} onClick={send}>{t('login.sendResetCode')}</button>}
       {sent && (
         <div>
-          <div className="field"><label>Reset code</label><input type="text" inputMode="numeric" required value={code} onChange={e => setCode(e.target.value)} disabled={done} /></div>
-          <div className="field"><label>New password</label><input type="password" autoComplete="new-password" required minLength={6} value={newPass} onChange={e => setNewPass(e.target.value)} disabled={done} /></div>
-          <button className="btn primary" type="submit" style={{ width: '100%' }} disabled={done}>Reset password</button>
+          <div className="field"><label>{t('login.resetCode')}</label><input type="text" inputMode="numeric" required value={code} onChange={e => setCode(e.target.value)} disabled={done} /></div>
+          <div className="field"><label>{t('login.newPassword')}</label><input type="password" autoComplete="new-password" required minLength={6} value={newPass} onChange={e => setNewPass(e.target.value)} disabled={done} /></div>
+          <button className="btn primary" type="submit" style={{ width: '100%' }} disabled={done}>{t('login.resetPassword')}</button>
         </div>
       )}
       <div className="autherr" style={{ color: errColor || undefined }}>{err}</div>
-      <a className="authlink" onClick={onBack}>Back to log in</a>
+      <a className="authlink" onClick={onBack}>{t('login.backToLogIn')}</a>
     </form>
   );
 }

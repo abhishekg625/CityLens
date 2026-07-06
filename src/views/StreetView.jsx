@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import Header from '../components/Header.jsx';
 import QItem from '../components/QItem.jsx';
@@ -11,6 +12,7 @@ import { useUI } from '../context/UIContext.jsx';
 import { useStore } from '../lib/useStore.js';
 
 export default function StreetView() {
+  const { t } = useTranslation();
   useStore();
   const { streetId } = useParams();
   const [searchParams] = useSearchParams();
@@ -29,16 +31,16 @@ export default function StreetView() {
   const trips = sel ? tripsForStreet(sel.id) : [];
 
   const crumb = scopedWard
-    ? [{ t: 'Mumbai', to: '/' }, { t: 'Ward ' + scopedWard, to: wardPath(scopedWard) }, { t: 'Streets' }]
-    : [{ t: 'Mumbai', to: '/' }, { t: 'Streets' }];
+    ? [{ t: 'Mumbai', to: '/' }, { t: t('common.wardLabel', { ward: scopedWard }), to: wardPath(scopedWard) }, { t: t('streetView.streets') }]
+    : [{ t: 'Mumbai', to: '/' }, { t: t('streetView.streets') }];
 
   const gotoStreet = id => navigate(`/streets/${id}${scopedWard ? `?ward=${scopedWard}` : ''}`);
 
   if (!sel) {
     return (
       <>
-        <Header crumb={crumb} title="Streets & corridors" sub="No corridors found." />
-        <div className="content"><div className="card cb"><div className="hint">No corridors in scope.</div></div></div>
+        <Header crumb={crumb} title={t('streetView.streetsAndCorridors')} sub={t('streetView.noCorridorsFound')} />
+        <div className="content"><div className="card cb"><div className="hint">{t('streetView.noCorridorsInScope')}</div></div></div>
       </>
     );
   }
@@ -47,15 +49,15 @@ export default function StreetView() {
     <>
       <Header
         crumb={crumb}
-        title="Streets & corridors"
+        title={t('streetView.streetsAndCorridors')}
         sub={scopedWard
-          ? `${allStreets.length} corridors in Ward ${scopedWard} — issues aggregated along each road segment.`
-          : `${allStreets.length} corridors across ${wardsFC.features.length} wards — issues aggregated along each road segment.`}
+          ? t('streetView.subScoped', { count: allStreets.length, ward: scopedWard })
+          : t('streetView.subAll', { count: allStreets.length, wards: wardsFC.features.length })}
       />
       <div className="content">
         <div className="row map-side">
           <div className="card">
-            <div className="ch"><h3>{sel.name} <span style={{ fontWeight: 600, color: 'var(--muted)', fontSize: 15 }}>· Ward {sel.wardId}</span></h3><span className="r">{list.length} detections along corridor</span></div>
+            <div className="ch"><h3>{sel.name} <span style={{ fontWeight: 600, color: 'var(--muted)', fontSize: 15 }}>· Ward {sel.wardId}</span></h3><span className="r">{t('streetView.detectionsAlongCorridor', { count: list.length })}</span></div>
             <LeafletMap
               mountKey={'street-' + sel.id}
               onMount={(L, m) => {
@@ -69,14 +71,14 @@ export default function StreetView() {
                 }
               }}
             />
-            <div className="legend">{Object.entries(TYPE).map(([k, v]) => <span className="it" key={k}><span className="sw" style={{ background: v.c }} />{v.label}</span>)}</div>
+            <div className="legend">{Object.entries(TYPE).map(([k, v]) => <span className="it" key={k}><span className="sw" style={{ background: v.c }} />{t(`issueTypes.${k}`)}</span>)}</div>
           </div>
           <div className="card">
-            <div className="ch"><h3>Corridors by open load</h3><span className="r">worst first</span></div>
+            <div className="ch"><h3>{t('streetView.corridorsByLoad')}</h3><span className="r">{t('streetView.worstFirst')}</span></div>
             <div style={{ maxHeight: 512, overflowY: 'auto' }}>
               <div className="tablewrap">
                 <table>
-                  <thead><tr><th>Street</th><th>Ward</th><th>Open</th><th>Load</th></tr></thead>
+                  <thead><tr><th>{t('streetView.street')}</th><th>{t('streetView.ward')}</th><th>{t('streetView.open')}</th><th>{t('streetView.load')}</th></tr></thead>
                   <tbody>
                     {streets.map(x => (
                       <tr className={`clk ${x.id === sel.id ? 'sel' : ''}`} key={x.id} onClick={() => gotoStreet(x.id)}>
@@ -92,30 +94,30 @@ export default function StreetView() {
         </div>
 
         <div className="card">
-          <div className="ch"><h3>All issues on {sel.name}</h3><span className="r">{list.length} total · every status</span></div>
+          <div className="ch"><h3>{t('streetView.allIssuesOn', { street: sel.name })}</h3><span className="r">{t('streetView.totalEveryStatus', { count: list.length })}</span></div>
           <div style={{ maxHeight: 452, overflowY: 'auto' }}>
             {!list.length
-              ? <div className="hint">No issues detected on this corridor yet.</div>
+              ? <div className="hint">{t('streetView.noIssuesYet')}</div>
               : list.slice().sort((a, b) => priority(b) - priority(a)).map(i => <QItem key={i.id} issue={i} />)}
           </div>
         </div>
 
         <div className="card">
-          <div className="ch"><h3>Fleet coverage</h3><span className="r">buses that have surveyed this corridor — click a trip to replay it</span></div>
+          <div className="ch"><h3>{t('streetView.fleetCoverage')}</h3><span className="r">{t('streetView.fleetCoverageHint')}</span></div>
           {trips.length ? (
             <div className="tablewrap">
               <table>
-                <thead><tr><th>Bus</th><th>Trip date</th><th>Detections here</th></tr></thead>
+                <thead><tr><th>{t('streetView.bus')}</th><th>{t('streetView.tripDate')}</th><th>{t('streetView.detectionsHere')}</th></tr></thead>
                 <tbody>
-                  {trips.map(t => (
-                    <tr className="clk" key={t.id} onClick={() => navigate(`/fleet/${t.bus}/${t.id}`)}>
-                      <td><b>{t.bus}</b></td><td>{fmtDate(t.date)}</td><td>{t.detections}</td>
+                  {trips.map(tr => (
+                    <tr className="clk" key={tr.id} onClick={() => navigate(`/fleet/${tr.bus}/${tr.id}`)}>
+                      <td><b>{tr.bus}</b></td><td>{fmtDate(tr.date)}</td><td>{tr.detections}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-          ) : <div className="hint" style={{ padding: '12px 16px' }}>No fleet passes logged on this corridor yet.</div>}
+          ) : <div className="hint" style={{ padding: '12px 16px' }}>{t('streetView.noFleetPasses')}</div>}
         </div>
       </div>
     </>

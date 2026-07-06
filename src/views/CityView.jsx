@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Header from '../components/Header.jsx';
 import KpiStrip from '../components/KpiStrip.jsx';
 import LeafletMap from '../components/LeafletMap.jsx';
@@ -10,6 +11,7 @@ import { useStore } from '../lib/useStore.js';
 
 export default function CityView() {
   useStore();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { openIssue } = useUI();
   const open = issues.filter(i => OPEN.has(i.status));
@@ -17,12 +19,12 @@ export default function CityView() {
 
   return (
     <>
-      <Header crumb={[{ t: 'Mumbai' }]} title="Mumbai — street-condition survey" sub="Every BMC ward, sensed by the bus fleet. Click a ward to drill in." />
+      <Header crumb={[{ t: t('cityView.crumb') }]} title={t('cityView.title')} sub={t('cityView.sub')} />
       <div className="content">
         <KpiStrip list={issues} />
         <div className="row map-side">
           <div className="card">
-            <div className="ch"><h3>Live detection map</h3><span className="r">{open.length} open · wards shaded by health score</span></div>
+            <div className="ch"><h3>{t('cityView.liveDetectionMap')}</h3><span className="r">{t('cityView.openWardsShaded', { count: open.length })}</span></div>
             <LeafletMap
               mountKey="city"
               onMount={(L, m) => {
@@ -34,18 +36,18 @@ export default function CityView() {
             />
             <div className="legend">
               {Object.entries(TYPE).map(([k, v]) => (
-                <span className="it" key={k}><span className="sw" style={{ background: v.c }} />{v.label}</span>
+                <span className="it" key={k}><span className="sw" style={{ background: v.c }} />{t(`issueTypes.${k}`)}</span>
               ))}
-              <span className="it" style={{ marginLeft: 'auto' }}><span className="sw" style={{ background: '#2e7d32' }} />healthy ward</span>
-              <span className="it"><span className="sw" style={{ background: '#d32f2f' }} />at-risk ward</span>
+              <span className="it" style={{ marginLeft: 'auto' }}><span className="sw" style={{ background: '#2e7d32' }} />{t('cityView.healthyWard')}</span>
+              <span className="it"><span className="sw" style={{ background: '#d32f2f' }} />{t('cityView.atRiskWard')}</span>
             </div>
           </div>
           <div className="card">
-            <div className="ch"><h3>Ward health leaderboard</h3><span className="r">worst first</span></div>
+            <div className="ch"><h3>{t('cityView.wardHealthLeaderboard')}</h3><span className="r">{t('cityView.worstFirst')}</span></div>
             <div style={{ maxHeight: 512, overflowY: 'auto' }}>
               <div className="tablewrap">
                 <table>
-                  <thead><tr><th></th><th>Ward</th><th>Score</th><th>Open</th><th>7-day</th></tr></thead>
+                  <thead><tr><th></th><th>{t('cityView.ward')}</th><th>{t('cityView.score')}</th><th>{t('cityView.open')}</th><th>{t('cityView.sevenDay')}</th></tr></thead>
                   <tbody>
                     {board.map((w, i) => (
                       <tr className="clk" key={w.ward} onClick={() => navigate(wardPath(w.ward))}>

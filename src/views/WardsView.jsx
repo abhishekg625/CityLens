@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header.jsx';
 import { OPEN, SCORES, scoreColor, issues, wardsFC, crewById } from '../lib/model.js';
@@ -6,6 +7,7 @@ import { wardPath } from '../lib/routes.js';
 import { useStore } from '../lib/useStore.js';
 
 export default function WardsView() {
+  const { t } = useTranslation();
   useStore();
   const navigate = useNavigate();
   const board = Object.values(SCORES).sort((a, b) => a.score - b.score);
@@ -13,16 +15,16 @@ export default function WardsView() {
   return (
     <>
       <Header
-        crumb={[{ t: 'Mumbai', to: '/' }, { t: 'Wards' }]}
-        title="Wards"
-        sub={`${wardsFC.features.length} BMC administrative wards — pick your area of responsibility.`}
+        crumb={[{ t: 'Mumbai', to: '/' }, { t: t('wardsView.wards') }]}
+        title={t('wardsView.wards')}
+        sub={t('wardsView.sub', { count: wardsFC.features.length })}
       />
       <div className="content">
         <div className="card">
-          <div className="ch"><h3>All wards</h3><span className="r">click to open the ward officer view</span></div>
+          <div className="ch"><h3>{t('wardsView.allWards')}</h3><span className="r">{t('wardsView.clickToOpen')}</span></div>
           <div className="tablewrap">
             <table>
-              <thead><tr><th></th><th>Ward</th><th>Area</th><th>Health</th><th>Open</th><th>High sev</th><th>Fixed</th><th>Contractor</th></tr></thead>
+              <thead><tr><th></th><th>{t('wardsView.ward')}</th><th>{t('wardsView.area')}</th><th>{t('wardsView.health')}</th><th>{t('wardsView.open')}</th><th>{t('wardsView.highSev')}</th><th>{t('wardsView.fixed')}</th><th>{t('wardsView.contractor')}</th></tr></thead>
               <tbody>
                 {board.map((w, i) => {
                   const wi = issues.filter(x => x.ward === w.ward);

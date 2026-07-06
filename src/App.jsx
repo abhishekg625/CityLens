@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { SessionProvider, useSession } from './context/SessionContext.jsx';
+import { ThemeProvider } from './context/ThemeContext.jsx';
 import Login from './pages/Login.jsx';
 import DashboardLayout from './pages/DashboardLayout.jsx';
 import CityView from './views/CityView.jsx';
@@ -27,6 +28,7 @@ function RedirectIfAuthed({ children }) {
 
 export default function App() {
   return (
+    <ThemeProvider>
     <BrowserRouter>
       <SessionProvider>
         <Routes>
@@ -49,5 +51,6 @@ export default function App() {
         </Routes>
       </SessionProvider>
     </BrowserRouter>
+    </ThemeProvider>
   );
 }
