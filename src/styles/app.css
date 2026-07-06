@@ -188,6 +188,9 @@ tr.clk.sel td{background:var(--warn-bg)} tr.clk.sel td:first-child{box-shadow:in
   .menubtn{order:1}
   #map,#wardmap,#streetmap,#fleetmap{height:300px}
   .row.cols-2{grid-template-columns:1fr}
+  .cmodal{width:94vw;max-height:88vh}
+  .cmodal .mh,.cmodal .mf{padding:12px 14px;flex-wrap:wrap}
+  .drawer{width:92vw}
 }
 
 @media(max-width:560px){
@@ -196,7 +199,20 @@ tr.clk.sel td{background:var(--warn-bg)} tr.clk.sel td:first-child{box-shadow:in
   .controls .track{flex-basis:100%}
   .videoslot{height:220px}
   .drawer{width:100%}
-  .cmodal{width:94vw}
+  .cmodal{width:96vw;max-height:92vh}
+  table{font-size:12px}
+  th,td{padding:8px 8px}
+}
+
+/* short viewports (landscape phones) — keep modal/drawer scrollable within view */
+@media(max-height:600px){
+  .cmodal{max-height:94vh}
+  .drawer{height:100%}
+}
+
+/* keep form inputs at >=16px on touch screens so iOS Safari doesn't auto-zoom on focus */
+@media(max-width:600px){
+  .field input[type=text],.field select{font-size:16px}
 }
 
 /* ---------- role-based access ---------- */
