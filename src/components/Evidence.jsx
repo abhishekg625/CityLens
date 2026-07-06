@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { TYPE } from '../lib/model.js';
 
 const EVIDENCE_PHOTOS = {
@@ -20,12 +21,14 @@ function pickEvidencePhoto(type, id) { // deterministic per issue
 // Real detector evidence (annotated frame / crop) when the pipeline provides it (issue.photo),
 // falling back to the curated stock photo / schematic below when it's absent or fails to load.
 export default function Evidence({ issue: i }) {
+  const { t } = useTranslation();
   const [photoFailed, setPhotoFailed] = useState(false);
+  const label = t(`issueTypes.${i.type}`);
   if (i.photo && !photoFailed) {
     return (
       <>
-        <img src={`/${i.photo}`} alt={`${TYPE[i.type].label} detection`} className="evimg" onError={() => setPhotoFailed(true)} />
-        <span className="evtag">detected frame · {Math.round(i.confidence * 100)}% · {i.id}</span>
+        <img src={`/${i.photo}`} alt={`${label} detection`} className="evimg" onError={() => setPhotoFailed(true)} />
+        <span className="evtag">{t('evidence.detectedFrame', { pct: Math.round(i.confidence * 100), id: i.id })}</span>
       </>
     );
   }
@@ -33,12 +36,12 @@ export default function Evidence({ issue: i }) {
   if (stock) {
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-        <img src={stock} alt={`${TYPE[i.type].label} evidence`} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+        <img src={stock} alt={`${label} evidence`} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
         <span style={{ position: 'absolute', left: 10, top: 10, background: TYPE[i.type].c, color: '#fff', fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 3 }}>
-          {TYPE[i.type].label} {Math.round(i.confidence * 100)}%
+          {label} {Math.round(i.confidence * 100)}%
         </span>
         <span style={{ position: 'absolute', left: 10, bottom: 8, color: '#fff', fontSize: 9, textShadow: '0 1px 2px rgba(0,0,0,.8)' }}>
-          dashcam frame · {i.id}
+          {t('evidence.dashcamFrame', { id: i.id })}
         </span>
       </div>
     );
@@ -53,8 +56,8 @@ export default function Evidence({ issue: i }) {
       <line x1="153" y1="112" x2="150" y2="200" stroke="#c9ccd1" strokeWidth="2" strokeDasharray="10 12" opacity=".5" />
       <rect x={110 + i.severity * 4} y={150 - i.severity * 3} width={26 + i.severity * 10} height={16 + i.severity * 7} fill="none" stroke={c} strokeWidth="3" rx="3" />
       <rect x={108 + i.severity * 4} y={134 - i.severity * 3} width={64} height={15} fill={c} />
-      <text x={112 + i.severity * 4} y={145 - i.severity * 3} fill="#fff" fontSize="10" fontWeight="700">{TYPE[i.type].label} {Math.round(i.confidence * 100)}%</text>
-      <text x="10" y="188" fill="#8b9099" fontSize="9">frame evidence · schematic · {i.id}</text>
+      <text x={112 + i.severity * 4} y={145 - i.severity * 3} fill="#fff" fontSize="10" fontWeight="700">{label} {Math.round(i.confidence * 100)}%</text>
+      <text x="10" y="188" fill="#8b9099" fontSize="9">{t('evidence.frameSchematic', { id: i.id })}</text>
     </svg>
   );
 }

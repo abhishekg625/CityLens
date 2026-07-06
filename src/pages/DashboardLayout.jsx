@@ -7,6 +7,7 @@ import Sidebar from '../components/Sidebar.jsx';
 import IssueDrawer from '../components/IssueDrawer.jsx';
 import CrewModal from '../components/CrewModal.jsx';
 import LiveToast from '../components/LiveToast.jsx';
+import SettingsDrawer from '../components/SettingsDrawer.jsx';
 import { startLivePolling } from '../lib/livePoll.js';
 import { wardPath } from '../lib/routes.js';
 
@@ -54,6 +55,7 @@ function DashboardShell() {
       </div>
       <IssueDrawer />
       <CrewModal />
+      <SettingsDrawer />
       <LiveToast />
     </div>
   );

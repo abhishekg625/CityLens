@@ -1,4 +1,5 @@
 import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Header from '../components/Header.jsx';
 import KpiStrip from '../components/KpiStrip.jsx';
 import QItem from '../components/QItem.jsx';
@@ -10,36 +11,38 @@ import { useStore } from '../lib/useStore.js';
 
 export default function CatView() {
   useStore();
-  const { type: t } = useParams();
+  const { t } = useTranslation();
+  const { type: catType } = useParams();
   const { openIssue } = useUI();
-  const meta = TYPE[t];
+  const meta = TYPE[catType];
 
   if (!meta) {
     return (
       <>
-        <Header crumb={[{ t: 'Mumbai', to: '/' }, { t: 'Not found' }]} title="Unknown category" sub="" />
-        <div className="content"><div className="card cb"><div className="hint">No such category.</div></div></div>
+        <Header crumb={[{ t: 'Mumbai', to: '/' }, { t: t('catView.notFound') }]} title={t('catView.unknownCategory')} sub="" />
+        <div className="content"><div className="card cb"><div className="hint">{t('catView.noSuchCategory')}</div></div></div>
       </>
     );
   }
 
-  const list = issues.filter(i => i.type === t);
+  const categoryLabel = t(`issueTypes.${catType}`);
+  const list = issues.filter(i => i.type === catType);
   const open = list.filter(i => OPEN.has(i.status)).sort((a, b) => priority(b) - priority(a));
 
   return (
     <>
       <Header
-        crumb={[{ t: 'Mumbai', to: '/' }, { t: meta.label }]}
-        title={`${meta.label} — city-wide`}
-        sub="One category across every ward, ranked for the responsible department."
+        crumb={[{ t: 'Mumbai', to: '/' }, { t: categoryLabel }]}
+        title={t('catView.cityWide', { category: categoryLabel })}
+        sub={t('catView.sub')}
       />
       <div className="content">
         <KpiStrip list={list} />
         <div className="row map-side">
           <div className="card">
-            <div className="ch"><h3>{meta.label} map</h3><span className="r">{open.length} open</span></div>
+            <div className="ch"><h3>{t('catView.categoryMap', { category: categoryLabel })}</h3><span className="r">{t('catView.openCount', { count: open.length })}</span></div>
             <LeafletMap
-              mountKey={'cat-' + t}
+              mountKey={'cat-' + catType}
               onMount={(L, m) => {
                 m.setView([19.09, 72.87], 11);
                 tileLayer(L, m);
@@ -49,7 +52,7 @@ export default function CatView() {
             />
           </div>
           <div className="card">
-            <div className="ch"><h3>Priority list</h3><span className="r">severity × persistence</span></div>
+            <div className="ch"><h3>{t('catView.priorityList')}</h3><span className="r">{t('catView.severityPersistence')}</span></div>
             <div style={{ maxHeight: 512, overflowY: 'auto' }}>
               {open.slice(0, 60).map(i => <QItem key={i.id} issue={i} />)}
             </div>

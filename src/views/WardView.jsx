@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Header from '../components/Header.jsx';
 import KpiStrip from '../components/KpiStrip.jsx';
 import QItem from '../components/QItem.jsx';
@@ -22,6 +23,7 @@ function StreetRow({ s, onOpen }) {
 
 export default function WardView() {
   useStore();
+  const { t } = useTranslation();
   const { wardId } = useParams();
   const navigate = useNavigate();
   const { session } = useSession();
@@ -33,8 +35,8 @@ export default function WardView() {
   if (!w) {
     return (
       <>
-        <Header crumb={[{ t: 'Mumbai', to: '/' }, { t: 'Wards', to: '/wards' }, { t: 'Not found' }]} title="Ward not found" sub="" />
-        <div className="content"><div className="card cb"><div className="hint">No ward "{wardId}" — pick one from the Wards list.</div></div></div>
+        <Header crumb={[{ t: 'Mumbai', to: '/' }, { t: 'Wards', to: '/wards' }, { t: t('wardView.notFound') }]} title={t('wardView.wardNotFound')} sub="" />
+        <div className="content"><div className="card cb"><div className="hint">{t('wardView.noWardHint', { wardId })}</div></div></div>
       </>
     );
   }
@@ -56,31 +58,31 @@ export default function WardView() {
   }).sort((a, b) => b.load - a.load);
 
   const crumb = session?.role === 'ward_officer'
-    ? [{ t: 'Ward ' + w.ward }]
-    : [{ t: 'Mumbai', to: '/' }, { t: 'Wards', to: '/wards' }, { t: 'Ward ' + w.ward }];
+    ? [{ t: t('common.wardLabel', { ward: w.ward }) }]
+    : [{ t: 'Mumbai', to: '/' }, { t: 'Wards', to: '/wards' }, { t: t('common.wardLabel', { ward: w.ward }) }];
 
   return (
     <>
       <Header crumb={crumb} title={`Ward ${w.ward} <span style="font-weight:600;color:var(--muted);font-size:15px">· ${w.area}</span>`}
-        sub="Ward officer view — resolution queue for open issues, highest priority first." />
+        sub={t('wardView.sub')} />
       <div className="content">
         <KpiStrip list={list} />
 
         <div className="card">
-          <div className="ch"><h3>Ward contractor</h3><span className="r">one crew responsible for every repairable issue in Ward {w.ward}</span></div>
+          <div className="ch"><h3>{t('wardView.wardContractor')}</h3><span className="r">{t('wardView.contractorHint', { ward: w.ward })}</span></div>
           <div className="cb" style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 16px', flexWrap: 'wrap' }}>
             {contractor
               ? <span className="badge assigned">{contractor.name} · {contractor.id}</span>
-              : <span className="badge unassigned">No ward contractor</span>}
+              : <span className="badge unassigned">{t('wardView.noWardContractor')}</span>}
             {canManage && (
               <>
-                <button className="btn primary sm" onClick={() => openModal('assignWardCrew', { ward: w.ward })}>{contractor ? 'Change contractor' : 'Assign contractor'}</button>
+                <button className="btn primary sm" onClick={() => openModal('assignWardCrew', { ward: w.ward })}>{contractor ? t('common.changeContractor') : t('common.assignContractor')}</button>
                 {contractor && (
                   <button className="btn sm danger" onClick={() => {
-                    if (confirm(`Remove ${contractor.name} as contractor for Ward ${w.ward}? Existing assignments stay as-is; new issues fall back to per-type assignment.`)) {
+                    if (confirm(t('wardView.removeContractorConfirm', { name: contractor.name, ward: w.ward }))) {
                       unassignWardCrew(w.ward);
                     }
-                  }}>Remove</button>
+                  }}>{t('common.remove')}</button>
                 )}
               </>
             )}
@@ -88,10 +90,10 @@ export default function WardView() {
         </div>
 
         <div className="card">
-          <div className="ch"><h3>Streets & corridors in Ward {w.ward}</h3><span className="r">click a corridor for its full issue list</span></div>
+          <div className="ch"><h3>{t('wardView.streetsInWard', { ward: w.ward })}</h3><span className="r">{t('wardView.clickCorridor')}</span></div>
           <div className="tablewrap">
             <table>
-              <thead><tr><th>Corridor</th><th>Open</th><th>Load</th></tr></thead>
+              <thead><tr><th>{t('wardView.corridor')}</th><th>{t('wardView.open')}</th><th>{t('wardView.load')}</th></tr></thead>
               <tbody>{streets.slice(0, 3).map(s => <StreetRow key={s.id} s={s} onOpen={() => navigate(`/streets/${s.id}?ward=${wardId}`)} />)}</tbody>
               {streetsExpanded && <tbody>{streets.slice(3).map(s => <StreetRow key={s.id} s={s} onOpen={() => navigate(`/streets/${s.id}?ward=${wardId}`)} />)}</tbody>}
             </table>
@@ -99,7 +101,7 @@ export default function WardView() {
           {streets.length > 3 && (
             <div style={{ padding: '10px 16px' }}>
               <button className="btn sm" onClick={() => setStreetsExpanded(e => !e)}>
-                {streetsExpanded ? 'Show fewer corridors' : `View ${streets.length - 3} more corridors`}
+                {streetsExpanded ? t('wardView.showFewer') : t('wardView.viewMore', { count: streets.length - 3 })}
               </button>
             </div>
           )}
@@ -107,22 +109,22 @@ export default function WardView() {
 
         <div className="row map-side">
           <div className="card">
-            <div className="ch"><h3>Resolution queue</h3><span className="r">{filtered.length} of {open.length} open · severity × persistence</span></div>
+            <div className="ch"><h3>{t('wardView.resolutionQueue')}</h3><span className="r">{t('wardView.queueSummary', { filtered: filtered.length, total: open.length })}</span></div>
             {showAssignFilter && (
               <div style={{ display: 'flex', gap: 6, padding: '10px 16px', borderBottom: '1px solid var(--line)', flexWrap: 'wrap' }}>
-                <button className={`btn sm ${filter === 'all' ? 'primary' : ''}`} onClick={() => setAssignFilter('all')}>All ({open.length})</button>
-                <button className={`btn sm ${filter === 'assigned' ? 'primary' : ''}`} onClick={() => setAssignFilter('assigned')}>Assigned ({assignedN})</button>
-                <button className={`btn sm ${filter === 'unassigned' ? 'primary' : ''}`} onClick={() => setAssignFilter('unassigned')}>Unassigned ({unassignedN})</button>
+                <button className={`btn sm ${filter === 'all' ? 'primary' : ''}`} onClick={() => setAssignFilter('all')}>{t('wardView.all', { count: open.length })}</button>
+                <button className={`btn sm ${filter === 'assigned' ? 'primary' : ''}`} onClick={() => setAssignFilter('assigned')}>{t('wardView.assigned', { count: assignedN })}</button>
+                <button className={`btn sm ${filter === 'unassigned' ? 'primary' : ''}`} onClick={() => setAssignFilter('unassigned')}>{t('wardView.unassigned', { count: unassignedN })}</button>
               </div>
             )}
             <div style={{ maxHeight: 452, overflowY: 'auto' }} id="queue">
               {!filtered.length
-                ? <div className="hint">{open.length ? 'No issues match this filter.' : 'No open issues in this ward. All clear.'}</div>
+                ? <div className="hint">{open.length ? t('wardView.noMatchFilter') : t('wardView.allClear')}</div>
                 : filtered.map(i => <QItem key={i.id} issue={i} />)}
             </div>
           </div>
           <div className="card">
-            <div className="ch"><h3>Ward {w.ward}</h3><span className="r">health {w.score}</span></div>
+            <div className="ch"><h3>{t('wardView.wardTitle', { ward: w.ward })}</h3><span className="r">{t('wardView.healthLabel', { score: w.score })}</span></div>
             <LeafletMap
               mountKey={'ward-' + wardId}
               onMount={(L, m) => {

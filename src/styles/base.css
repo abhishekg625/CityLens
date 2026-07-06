@@ -1,22 +1,124 @@
 /* CityLens — shared base: CSS variables, reset, root layout */
 
-:root{
-  --bg:#f4f5f7; --panel:#fff; --ink:#323232; --muted:#6b7280; --faint:#9096a0;
-  --line:#e8eaee; --line2:#e3e6eb; --chalo:#f57c00; --chalo-d:#e56a00;
-  --pothole:#d32f2f; --water:#3b6fc4; --garbage:#c98a12; --obstruction:#e56a00;
-  --good:#2e7d32; --good-bg:#e8f3ea; --warn-bg:#fdf3e3; --bad-bg:#fdeceb;
-  --radius:12px; --shadow:0 1px 2px rgba(20,24,31,.05),0 4px 16px rgba(20,24,31,.04);
+:root {
+  --bg: #f4f5f7;
+  --panel: #fff;
+  --ink: #323232;
+  --muted: #6b7280;
+  --faint: #9096a0;
+  --line: #e8eaee;
+  --line2: #e3e6eb;
+  --chalo: #f57c00;
+  --chalo-d: #e56a00;
+  --pothole: #d32f2f;
+  --water: #3b6fc4;
+  --garbage: #c98a12;
+  --obstruction: #e56a00;
+  --good: #2e7d32;
+  --good-bg: #e8f3ea;
+  --warn-bg: #fdf3e3;
+  --bad-bg: #fdeceb;
+  --radius: 12px;
+  --shadow: 0 1px 2px rgba(20, 24, 31, .05), 0 4px 16px rgba(20, 24, 31, .04);
+  --hover: #f6f7f9;
+  --row-line: #f1f2f5;
+  --chip: #f0f1f4;
+  --active-chip: #fbe3c7;
 }
-*{box-sizing:border-box}
-html,body{margin:0;height:100%}
-body{font-family:'Noto Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);
-  font-size:14px;line-height:1.45;display:flex;height:100vh;overflow-y:auto;overflow-x:hidden}
-.app{display:flex;width:100%;height:100%;position:relative}
+
+:root[data-theme="dark"] {
+  --bg: #16181d;
+  --panel: #1e2128;
+  --ink: #e7e9ec;
+  --muted: #9096a0;
+  --faint: #6b7280;
+  --line: #2b2f37;
+  --line2: #33373f;
+  --chalo: #f57c00;
+  --chalo-d: #ff8f1f;
+  --pothole: #ef5350;
+  --water: #5b8fdb;
+  --garbage: #dba33a;
+  --obstruction: #ff8f3d;
+  --good: #4caf50;
+  --good-bg: #1c2e1e;
+  --warn-bg: #332a17;
+  --bad-bg: #331e1c;
+  --radius: 12px;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 4px 16px rgba(0, 0, 0, .25);
+  --hover: #282c34;
+  --row-line: #282c34;
+  --chip: #282c34;
+  --active-chip: #3d2f1c;
+}
+
+* {
+  box-sizing: border-box
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%
+}
+
+body {
+  font-family: 'Noto Sans', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.45;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: background .15s, color .15s
+}
+
+.app {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+}
 
 /* buttons — shared by the dashboard and the auth screens */
-.btn{font:inherit;font-weight:700;font-size:12.5px;border-radius:9px;padding:8px 14px;cursor:pointer;border:1px solid var(--line2);background:#fff;color:var(--ink)}
-.btn:hover{background:#f6f7f9}
-.btn.primary{background:var(--chalo);border-color:var(--chalo);color:#fff}
-.btn.primary:hover{background:var(--chalo-d)}
-.btn.good{background:var(--good);border-color:var(--good);color:#fff}.btn.good:hover{filter:brightness(.95)}
-.btn.sm{padding:6px 11px;font-size:11.5px}
+.btn {
+  font: inherit;
+  font-weight: 700;
+  font-size: 12.5px;
+  border-radius: 9px;
+  padding: 8px 14px;
+  cursor: pointer;
+  border: 1px solid var(--line2);
+  background: var(--panel);
+  color: var(--ink)
+}
+
+.btn:hover {
+  background: var(--hover)
+}
+
+.btn.primary {
+  background: var(--chalo);
+  border-color: var(--chalo);
+  color: #fff
+}
+
+.btn.primary:hover {
+  background: var(--chalo-d)
+}
+
+.btn.good {
+  background: var(--good);
+  border-color: var(--good);
+  color: #fff
+}
+
+.btn.good:hover {
+  filter: brightness(.95)
+}
+
+.btn.sm {
+  padding: 6px 11px;
+  font-size: 11.5px
+}
